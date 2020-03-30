@@ -110,3 +110,4 @@ deploy.sh
 *.pyc
 data_128
 *.npy
+old/
