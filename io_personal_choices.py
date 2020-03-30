@@ -11,19 +11,9 @@ from keras.constraints import Constraint
 import keras.backend as K
 import tensorflow as tf
 
-class LeakyReLU(Layer):
 
-    def __init__(self, alpha=0.3, **kwargs):
-        super(LeakyReLU, self).__init__(**kwargs)
-        self.supports_masking = True
-        self.alpha = K.cast_to_floatx(alpha)
-
-    def call(self, inputs):
-        return K.relu(inputs, alpha=self.alpha)
-
-    def compute_output_shape(self, input_shape):
-        return input_shape
-
+def activation(x):
+    return K.sigmoid(x) * 10
 
 def get_layer(n_inputs, current_available):
     visible = Input(shape=(n_inputs,))
@@ -35,7 +25,7 @@ def get_layer(n_inputs, current_available):
     X = Dense(n_inputs, use_bias=False)(X)
     #X = LeakyReLU(alpha=0.0001)(X)
     #X = Activation("relu")(X)
-    X = Activation("sigmoid")(X)
+    #X = Activation(activation)(X)
 
     out = dot([X, v], axes = -1)
    # out = Activation("relu")(out)
@@ -89,15 +79,59 @@ def full_matrix(production_df, demand_df, overcompletion):
 
 
 
-    print(production_df.to_latex())
+    print(production_df)
     matrix = production_df.values[:, 1:]
     return matrix
+
+
+def calculate_percentages(X, x, production_df,  demand_df, model):
+    people = list(demand_df["Name"])
+    columns = list(demand_df.columns)[1:]
+    #print(columns)
+    perc = {}
+    #print(production_df["Type"], indices)
+
+
+    starting_position = production_df.shape[1] - len(columns)
+    #print(production_df)
+    #print(starting_position)
+    completed_demand = demand_df.copy()
+    for i, id in enumerate(columns):
+        for j, person in enumerate(people):
+            r = production_df.loc[production_df["Type"] == id]
+            #print(demand_df)
+            expected = demand_df.loc[demand_df["Name"] == person][id]
+            expected = expected.values[0]
+            #print(expected)
+            #exit()
+            #print(demand_df)
+            #print("==========")
+           # print()
+            X_row_copy = X[r.index.values[0]].copy()
+            #X_copy[:,i] = 0
+            # ones = np.ones(shape=(X.shape[0], 3))
+            # l = model.predict([X_copy, ones])
+
+            X_row_copy[starting_position + j] = 0
+
+            #print("num", X_row_copy, x[0])
+            #print("num", )
+            #print(id, person, X_row_copy.dot(x[0]), expected)
+            completed_demand.loc[j,id] = X_row_copy.dot(x[0])/expected
+    print(completed_demand)
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     production_df = pd.read_csv("data/butter_production.csv")
     demand_df = pd.read_csv("data/butter_demand.csv")
 
-    matrix = full_matrix(production_df, demand_df, 1.0)
+    matrix = full_matrix(production_df.copy(), demand_df, 1.0)
 
 
     A = matrix[:, :-1]
@@ -109,18 +143,17 @@ if __name__ == "__main__":
 
 
     model, X_model = nn(len(X.T), np.array([[500,500]]).T)
-    model.fit([X, ones], y, epochs=1000, batch_size=30, shuffle=True, verbose=False)
+    model.fit([X, ones], y, epochs=10000, batch_size=30, shuffle=True, verbose=False)
 
     print("MSE", mean_squared_error(y, model.predict([X, ones])))
 
     x = X_model.predict(one)
-    l = dict(zip(production_df.columns[1:-(len(demand_df.columns) )], x.T))
+    l = dict(zip(production_df.columns[1:-1], x.T))
 
     solution = pd.DataFrame(l)
     print(solution)
     #print("A",x.dot(A))
-    print("num", X[0], x[0])
-    X[0][-2] = 0
-    print("num", X[0].dot(x[0]))
+    calculate_percentages(X, x, production_df, demand_df, model)
+
 
     print("actual output", model.predict([X, ones]))
