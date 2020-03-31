@@ -16,10 +16,13 @@ def activation(x):
     return K.sigmoid(x) * 10
 
 def get_layer(n_inputs, current_available):
-    visible = Input(shape=(n_inputs,))
+    visible = Input(shape=(n_inputs,), name = "A")
     v = visible
+    # v = Dense(10)(v)
+    # v = Dense(n_inputs, use_bias = False)(v)
+
     #v = LeakyReLU()(visible)
-    ones = Input(shape=(3,))
+    ones = Input(shape=(3,), name = "Dummy")
 
     X = Dense(1, use_bias=False)(ones)
     X = Dense(n_inputs, use_bias=False)(X)
@@ -131,7 +134,7 @@ if __name__ == "__main__":
     production_df = pd.read_csv("data/butter_production.csv")
     demand_df = pd.read_csv("data/butter_demand.csv")
 
-    matrix = full_matrix(production_df.copy(), demand_df, 1.0)
+    matrix = full_matrix(production_df.copy(), demand_df, 1.)
 
 
     A = matrix[:, :-1]
