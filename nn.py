@@ -43,7 +43,7 @@ def nn(n_inputs):
     #out, visible, eye_visible = get_layer(n_inputs, out)
 
     model = Model(inputs=[visible, eye_visible,  ones], outputs=[out], name="model")
-    model.compile(optimizer=Adam(0.001), loss="mse")
+    model.compile(optimizer=SGD(0.001), loss="mse")
 
     X_model = Model(inputs=[ones], outputs=[X], name="X_model")
 

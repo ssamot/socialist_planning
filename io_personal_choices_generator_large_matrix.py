@@ -9,7 +9,7 @@ from metrics import calculate_percentages, humanity
 from tqdm import tqdm
 
 from nn import nn
-from utils import batch_generator
+from utils import batch_generator_sparse
 from scipy import sparse
 from generate_matrices import A_file, I_file, y_file, n_household_goods, n_industrial_goods, n_population
 
@@ -31,24 +31,38 @@ if __name__ == "__main__":
     value = []
     iterations = []
 
-    max_iterations = 20000
+    max_iterations = 200000
+    # print(A.toarray())
+    # print(y)
+    # print(I.toarray())
+    # exit()
     with tqdm(total=max_iterations) as pbar:
-        for i, [A_batch, I_batch, y_batch] in enumerate(batch_generator([A,I, y], batch_size=2, split = n_household_goods + n_industrial_goods)):
+        for i, [A_batch, I_batch, y_batch] in enumerate(batch_generator_sparse([A,I, y], batch_size=1200, split = n_household_goods + n_industrial_goods)):
             #print(A_batch.shape)
+
             ones = np.ones(shape=(A_batch.shape[0], 3))
+
 
             model.train_on_batch([A_batch, I_batch,  ones], y_batch)
 
-            MSE = mse(y, model.predict([A,I, ones_full]))
-            metric.append("mse")
-            value.append(float(MSE))
-            iterations.append(i)
+            if((i+1)%1000 == 0 ):
+                x = X_model.predict([ones])
+                #print(A_batch)
+                #print(y_batch)
+                y_hat = model.predict([A, I, ones_full])
+                #print(y_hat)
+                MSE = mse(y, y_hat)
+                metric.append("mse")
+                value.append(float(MSE))
+                iterations.append(i)
 
-            hu = humanity(A, I,n_population, n_household_goods + n_industrial_goods, model, s=True)
-            metric.append("$\mathcal{HU}_p$")
-            value.append(float(hu))
-            iterations.append(i)
-            pbar.set_postfix({"hu":"%0.3f" % hu, "mse":"%0.3f" % MSE})
+                # hu = humanity(A, I,n_household_goods + n_industrial_goods, n_population, model, s=True, sparse=True)
+                # metric.append("$\mathcal{HU}_p$")
+                # value.append(float(hu))
+                # iterations.append(i)
+                #pbar.set_postfix({"hu": "%0.3f" % hu, "mse": "%0.3f" % MSE})
+                pbar.set_postfix({ "mse": "%0.3f" % MSE})
+
             pbar.update()
 
             if(i > max_iterations):

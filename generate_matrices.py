@@ -7,9 +7,9 @@ A_file = "./data/A.npz"
 I_file = "./data/I.npz"
 y_file = "./data/y.npz"
 
-n_household_goods = 10**2
-n_industrial_goods = 10**3
-n_population = 10**4
+n_household_goods = 10
+n_industrial_goods = 100
+n_population = 300
 
 def convert_size(size, suffix):
    if size == 0:
@@ -35,7 +35,9 @@ def get_density(mat):
     return density
 
 def get_goods_matrices(size):
-    mult = 50
+    mult = size
+    l = list(range(2))
+    cl_options = list(range(size))
 
     cols = np.zeros(shape=size * mult, dtype=np.float32)
     rows = np.zeros(shape=size * mult, dtype=np.float32)
@@ -44,13 +46,17 @@ def get_goods_matrices(size):
     for i in tqdm(range(size)):
         # slow loop
         # r = np.zeros(shape = size)
-        js = np.random.randint(size, size=mult)
-        rs = np.random.randint(10, size=mult)
+        js = np.random.choice(cl_options, size=mult, replace=False)
+        vs = np.random.randint(10, size=mult)
+        #print(js)
         for n in range(0, mult):
             rows[k] = i
             cols[k] = js[n]
-            values[k] = rs[n]
+            values[k] = vs[n]
+            if(cols[k] == rows[k]):
+                values[k] = 0.1
             k += 1
+    #print(values)
     return cols, rows, values
 
 
@@ -74,10 +80,11 @@ def get_matrices(n_industrial_goods, n_household_goods, n_population):
     #print(convert_size_bytes(n_population*n_household_goods * 24))
     #exit()
     for i in tqdm(range(n_household_goods)):
+        print(i, n_household_goods)
         cols.extend(population_columns)
         values.extend(np.random.randint(10, size=n_population))
         rows.extend([i]*n_population)
-
+    print(values)
     print("finished goods")
     #print(convert_size_bytes(len(goods_columns) * len(goods_columns) * 32))
     cols_goods, rows_goods, values_goods = get_goods_matrices(n_industrial_goods + n_household_goods)
@@ -85,6 +92,7 @@ def get_matrices(n_industrial_goods, n_household_goods, n_population):
     cols.extend(cols_goods)
     rows.extend(rows_goods)
     values.extend((values_goods))
+    #print(values)
     return cols, rows, values
 
 
@@ -98,9 +106,12 @@ def get_random_matrices(n_industrial_goods, n_household_goods,  n_population):
 
     size = n_industrial_goods + n_household_goods + n_population
     cols, rows, values = get_matrices(n_industrial_goods, n_household_goods,  n_population)
+    #print(values)
 
 
     A = coo_matrix(coo_matrix((values, (rows, cols)), dtype = np.float32, shape=(size, size))).tocsr()
+    #print(A.toarray())
+    #exit()
 
     I = eye(y.shape[0], y.shape[0], dtype=np.float32, format="csr")
 

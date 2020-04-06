@@ -45,24 +45,27 @@ if __name__ == "__main__":
     value = []
     iterations = []
 
-    max_iterations = 20000
+    max_iterations = 200000
     with tqdm(total=max_iterations) as pbar:
         #print(len(demand_df)); exit()
-        for i, [A_batch, I_batch, y_batch] in enumerate(batch_generator([A,I, y], batch_size=1, split = len(A) - len(demand_df))):
+        for i, [A_batch, I_batch, y_batch] in enumerate(batch_generator([A,I, y], batch_size=10, split = len(A) - len(demand_df))):
             ones = np.ones(shape=(A_batch.shape[0], 3))
 
-            model.train_on_batch([A_batch, I_batch,  ones], y_batch)
+            model.train_on_batch([A, I,  ones_full], y)
 
-            MSE = mse(y, model.predict([A,I, ones_full]))
-            metric.append("mse")
-            value.append(float(MSE))
-            iterations.append(i)
-
-            hu = humanity(A, I,len(A) - len(demand_df), 2, model)
-            metric.append("$\mathcal{HU}_p$")
-            value.append(float(hu))
-            iterations.append(i)
-            pbar.set_postfix({"hu":"%0.3f" % hu, "mse":"%0.3f" % MSE})
+            if(i%100 == 0):
+                MSE = mse(y, model.predict([A,I, ones_full]))
+                metric.append("mse")
+                value.append(float(MSE))
+                iterations.append(i)
+                #print(len(A) - len(demand_df))
+                #print(len(demand_df.T))
+                #exit()
+                hu = humanity(A, I,len(A) - len(demand_df), len(demand_df.T), model, s = False, sparse = False)
+                metric.append("$\mathcal{HU}_p$")
+                value.append(float(hu))
+                iterations.append(i)
+                pbar.set_postfix({"hu":"%0.3f" % hu, "mse":"%0.3f" % MSE})
             pbar.update()
 
             if(i > max_iterations):

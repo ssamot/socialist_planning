@@ -54,12 +54,14 @@ def sample(A, cit, i, size = 100 ):
     #print(columns_civilians.shape, total_civilians)
     for j in s:
         #print(i,j)
-        yield j, columns_civilians[i][j]
+        #print(columns_civilians[i,j])
+        #exit()
+        yield j, columns_civilians[i,j]
 
 
 
 
-def humanity(A, I,  cit, n_goods,  model, sample = False):
+def humanity(A, I,  cit, n_goods,  model, s = False, sparse = False):
     #print(cit, n_goods)
     columns_civilians = A[:, cit:]
     ones = np.ones(shape=(1, 3))
@@ -67,17 +69,19 @@ def humanity(A, I,  cit, n_goods,  model, sample = False):
     h_min = np.inf
     for i in range(n_goods):
         #print(row_production)
-        row_production = A[i]
-        #row_production = row_production[0]
-        #print(row_production.shape)
-        A_input = np.array([row_production])
-        I_input = np.array([I[i]])
-        #print(A_input.shape, I_input.shape)
-        #exit()
+        if(sparse):
+            row_production = A[i].toarray()
+            A_input = row_production
+            I_input = I[i].toarray()
+        else:
+            row_production = A[i]
+            A_input = np.array([row_production])
+            I_input = np.array([I[i]])
+
         y_hat = model.predict([A_input, I_input, ones])[0]
         per_civilian = y_hat/columns_civilians.shape[0]
         #for j,demand_civilian in enumerate(columns_civilians[i]):
-        if(sample):
+        if(s):
             s_func = sample
         else:
             s_func = full
@@ -85,16 +89,17 @@ def humanity(A, I,  cit, n_goods,  model, sample = False):
 
             if(demand_civilian == 0):
                continue
-            expected = demand_civilian
+            #expected = demand_civilian
+            #row_copy = row_production.copy()
 
-            row_copy = row_production.copy()
             #print(row_copy)
             #exit()
 
-            row_copy[cit+j] = 0
-            A_input = np.array([row_copy])
+            A_input[0,cit+j] = 0
+            #A_input = row_production
             real = model.predict([A_input, I_input, ones])[0]
-            score = (real/expected) + per_civilian
+            A_input[0,cit + j] = demand_civilian
+            score = (real/demand_civilian) + per_civilian
             #print(real, expected)
             h_min  = np.min([score,h_min])
 
@@ -102,4 +107,5 @@ def humanity(A, I,  cit, n_goods,  model, sample = False):
             #exit()
             #print(row
             #_civilians)
+
 

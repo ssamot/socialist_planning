@@ -46,6 +46,53 @@ def full_matrix(production_df, demand_df, overcompletion):
 #         tbr = [k[mini_batch_indices] for k in data]
 #         yield tbr
 
+def batch_generator_sparse(data, batch_size, replace=False, split = -1):
+    """Generate batches of data.
+    Given a list of numpy arrays, it iterates over the list and returns batches of the same size.
+    """
+    #goods_indices = range(0,n_population)
+    #print(split, len(data))
+    # print(data[2].shape)
+    # print(data[2].sum())
+    # exit()
+    while True:
+        mini_batch_indices_0 = np.random.randint(split, size=batch_size)
+        #print(mini_batch_indices_0.shape)
+        mini_batch_indices_1 = np.random.randint(split, data[0].shape[0], size=batch_size)
+        #print(mini_batch_indices_1.shape)
+        tbr = [(k[np.concatenate([mini_batch_indices_0, mini_batch_indices_1])]) for k in data]
+        #print(tbr.shape)
+        #exit()
+
+        tbr[0] = tbr[0].toarray()
+        tbr[1] = tbr[1].toarray()
+        #print("dfsfd")
+        yield tbr
+
+
+# def batch_generator_sparse(data, batch_size, replace=False, split = -1):
+#     """Generate batches of data.
+#     Given a list of numpy arrays, it iterates over the list and returns batches of the same size.
+#     """
+#     #goods_indices = range(0,n_population)
+#     #print(split, len(data))
+#     # print(data[2].shape)
+#     # print(data[2].sum())
+#     # exit()
+#     while True:
+#         mini_batch_indices_0 = np.random.randint(data[0].shape[0], size=batch_size)
+#         #print(mini_batch_indices_0.shape)
+#         #mini_batch_indices_1 = np.random.randint(split, data[0].shape[0], size=batch_size)
+#         #print(mini_batch_indices_1.shape)
+#         tbr = [(k[mini_batch_indices_0]) for k in data]
+#         #print(tbr.shape)
+#         #exit()
+#
+#         tbr[0] = tbr[0].toarray()
+#         tbr[1] = tbr[1].toarray()
+#         #print("dfsfd")
+#         yield tbr
+
 def batch_generator(data, batch_size, replace=False, split = -1):
     """Generate batches of data.
     Given a list of numpy arrays, it iterates over the list and returns batches of the same size.
