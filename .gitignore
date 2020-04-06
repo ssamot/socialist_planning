@@ -112,3 +112,4 @@ data_128
 *.npy
 old/
 .~lock.*#
+*.npz
