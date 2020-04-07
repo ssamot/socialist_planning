@@ -7,9 +7,9 @@ A_file = "./data/A.npz"
 I_file = "./data/I.npz"
 y_file = "./data/y.npz"
 
-n_household_goods = 10
-n_industrial_goods = 100
-n_population = 300
+n_household_goods = 1000
+n_industrial_goods = 10000
+n_population = 50
 
 def convert_size(size, suffix):
    if size == 0:
@@ -35,7 +35,7 @@ def get_density(mat):
     return density
 
 def get_goods_matrices(size):
-    mult = size
+    mult = 50
     l = list(range(2))
     cl_options = list(range(size))
 
@@ -80,11 +80,11 @@ def get_matrices(n_industrial_goods, n_household_goods, n_population):
     #print(convert_size_bytes(n_population*n_household_goods * 24))
     #exit()
     for i in tqdm(range(n_household_goods)):
-        print(i, n_household_goods)
+        #print(i, n_household_goods)
         cols.extend(population_columns)
         values.extend(np.random.randint(10, size=n_population))
         rows.extend([i]*n_population)
-    print(values)
+    #print(values)
     print("finished goods")
     #print(convert_size_bytes(len(goods_columns) * len(goods_columns) * 32))
     cols_goods, rows_goods, values_goods = get_goods_matrices(n_industrial_goods + n_household_goods)

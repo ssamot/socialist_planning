@@ -55,6 +55,8 @@ if __name__ == "__main__":
 
             if(i%100 == 0):
                 MSE = mse(y, model.predict([A,I, ones_full]))
+                x = X_model.predict([np.ones(shape = (1,3))])
+                print(x)
                 metric.append("mse")
                 value.append(float(MSE))
                 iterations.append(i)

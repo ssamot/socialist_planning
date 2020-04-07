@@ -43,7 +43,7 @@ if __name__ == "__main__":
             ones = np.ones(shape=(A_batch.shape[0], 3))
 
 
-            model.train_on_batch([A_batch, I_batch,  ones], y_batch)
+            model.train_on_batch([A.toarray(), I.toarray(),  ones_full], y)
 
             if((i+1)%1000 == 0 ):
                 x = X_model.predict([ones])

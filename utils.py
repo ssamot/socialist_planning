@@ -4,8 +4,8 @@ def full_matrix(production_df, demand_df, overcompletion):
     industries = list(production_df["Type"])
     indices = list(demand_df["Name"])
 
-    print(production_df)
-    print(demand_df)
+    #print(production_df)
+    #print(demand_df)
 
     for idx in indices:
         production_df.insert(production_df.shape[1] - 1, idx, 0)
@@ -22,7 +22,7 @@ def full_matrix(production_df, demand_df, overcompletion):
         production_df = production_df.append(k, ignore_index=True)
 
     basic_industries = list(demand_df.columns)[1:]
-    print(basic_industries)
+    #print(basic_industries)
 
     for industry in basic_industries:
         for name in indices:
@@ -31,7 +31,7 @@ def full_matrix(production_df, demand_df, overcompletion):
 
 
 
-    print(production_df)
+    #print(production_df)
     matrix = production_df.values[:, 1:]
     return matrix
 
