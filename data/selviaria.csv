@@ -1,0 +1,7 @@
+Type,Lucloelium,Vorpal Pick +1,T-ring,Lb(Lucloelium),Lb(Vorpal Pick +1),Lb(T-ring),Output
+Lucloelium,0.001,0.07,1,0,0,0,0
+Vorpal Pick +1,0.5,0,0,0,0,0,0
+T-ring,0,0,0,0,0,0,0
+Lb(Lucloelium),0.001,0,0,0,0,0,0
+Lb(Vorpal Pick +1),0,0.012,0,0,0,0,0
+Lb(T-ring),0,0,0.001,0,0,0,0

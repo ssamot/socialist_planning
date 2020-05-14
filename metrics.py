@@ -59,16 +59,15 @@ def sample(A, cit, i, size = 100 ):
         yield j, columns_civilians[i,j]
 
 
-
-
-def humanity(A, I,  cit, n_goods,  model, s = False, sparse = False):
+#
+# there is obviously in insanaely faster way of doing this
+def humanity(A, I, y,  cit, n_goods,  x, s = False, sparse = False):
     #print(cit, n_goods)
-    columns_civilians = A[:, cit:]
-    ones = np.ones(shape=(1, 3))
+    #columns_civilians = A[:, cit:]
+
 
     h_min = np.inf
     for i in range(n_goods):
-        #print(row_production)
         if(sparse):
             row_production = A[i].toarray()
             A_input = row_production
@@ -77,10 +76,6 @@ def humanity(A, I,  cit, n_goods,  model, s = False, sparse = False):
             row_production = A[i]
             A_input = np.array([row_production])
             I_input = np.array([I[i]])
-
-        y_hat = model.predict([A_input, I_input, ones])[0]
-        per_civilian = y_hat/columns_civilians.shape[0]
-        #for j,demand_civilian in enumerate(columns_civilians[i]):
         if(s):
             s_func = sample
         else:
@@ -89,23 +84,21 @@ def humanity(A, I,  cit, n_goods,  model, s = False, sparse = False):
 
             if(demand_civilian == 0):
                continue
-            #expected = demand_civilian
-            #row_copy = row_production.copy()
-
-            #print(row_copy)
-            #exit()
 
             A_input[0,cit+j] = 0
-            #A_input = row_production
-            real = model.predict([A_input, I_input, ones])[0]
+            real = (I_input - A_input ).dot(x)
             A_input[0,cit + j] = demand_civilian
-            score = (real/demand_civilian) + per_civilian
-            #print(real, expected)
+            score = real/(demand_civilian*y[cit + j])
             h_min  = np.min([score,h_min])
 
-    return h_min
-            #exit()
-            #print(row
-            #_civilians)
+    return np.float(h_min)
+
+
+# def humanity(A, I, y, x, good_columns, profile_columns):
+#     #for profile_column in profile_columns:
+#         y_hat = (I[:,goods_columns]-A[:,profile_columns]).dot(x)
+
+
+
 
 
