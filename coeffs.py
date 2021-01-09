@@ -2,7 +2,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
-from generate_matrices import convert_size_round, convert_size
+from utils import convert_size, convert_size_round
 from scipy.interpolate import UnivariateSpline
 
 VORPAL_PICK_ = "Units of Vorpal Pick +1"
@@ -77,7 +77,6 @@ def plot():
 def get_io_approximations():
     df = generate_data()[["Lucloelium a", "Vorpal Pick +1 a"]]
     x = df.index
-    #print(x)
 
     y = df["Lucloelium a"].values
     a = UnivariateSpline(x, y, k = 1, s=0)

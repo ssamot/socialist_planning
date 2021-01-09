@@ -1,48 +1,35 @@
 import numpy as np
-
-#np.set_printoptions(precision=3, suppress=True)
 np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
-
-from sklearn.metrics import mean_squared_error as mse
 import pandas as pd
 from utils import full_matrix
-from scipy import sparse
 from scipy.sparse import linalg
-import time
 from metrics import humanity
 from scipy.sparse.linalg import lsmr
 from scipy.optimize import minimize_scalar
 from coeffs import get_io_approximations
+from argparse import ArgumentParser
 
 
-
-def get_coeff_matrix(A,I, xtm, io_coeff_functions):
-    for (i,j, f) in io_coeff_functions:
-        A[i,j] = f(xtm[j])
-        #print(A[i,j], xtm[j], f(xtm[j]))
+def get_coeff_matrix(A, I, xtm, io_coeff_functions):
+    for (i, j, f) in io_coeff_functions:
+        A[i, j] = f(xtm[j])
     return I - A
 
 
-def solve_eq(X,y,io_coeff_functions, A,I,xtm ):
-    if(io_coeff_functions is None):
+def solve_eq(X, y, io_coeff_functions, A, I, xtm):
+    if (io_coeff_functions is None):
         x = lsmr(X.astype("double"), y.astype("double"), maxiter=100000, atol=0, btol=0, conlim=0)[0]
     else:
         x = xtm + 0.001
         for i in range(3):
-            #print(x)
-            X = get_coeff_matrix(A,I, x, io_coeff_functions)
-            #x = lsmr(X.astype("double"), y.astype("double"), maxiter=100000, atol=0, btol=0, conlim=0)[0]
+            X = get_coeff_matrix(A, I, x, io_coeff_functions)
             x = linalg.spsolve(X.astype("double"), y.astype("double"))
     return x
 
 
-
 def solve(production_df, demand_df, ub, io_coeff_functions, citizens):
-
     v, production_df = full_matrix(production_df.copy(), demand_df, 1)
     n_profiles = demand_df.values.shape[0]
-
-
 
     A = v[:, :-1]
     I = np.eye(A.shape[0])
@@ -50,48 +37,36 @@ def solve(production_df, demand_df, ub, io_coeff_functions, citizens):
     X = I - A
     y[-n_profiles:] = citizens
 
-
-    if(ub is None):
-        x = solve_eq(X,y,io_coeff_functions, A,I,y )
+    if (ub is None):
+        x = solve_eq(X, y, io_coeff_functions, A, I, y)
     else:
-        #exit()
-        x = solve_eq(X,y,io_coeff_functions, A,I,y )
+        x = solve_eq(X, y, io_coeff_functions, A, I, y)
         ub_f = x.copy()
         ub_f[:ub.shape[0]] = ub[:]
 
-
-
         def fun(d):
-            x = solve_eq(X,y/d,io_coeff_functions, A,I,y/d )
+            x = solve_eq(X, y / d, io_coeff_functions, A, I, y / d)
             r = ub_f - x
-            r[r>0] = 0
+            r[r > 0] = 0
             r = -r
-            #print(r, r.sum(), d,  "test")
-            if(r.sum() > 0.00001):
+            # print(r, r.sum(), d,  "test")
+            if (r.sum() > 0.00001):
                 return r.sum()
             return (-np.sum(x[-n_profiles:]))
 
+        mult = minimize_scalar(fun, bounds=[1, 10000], method="bounded")["x"]
 
-        mult = minimize_scalar(fun, bounds = [1, 10000], method = "bounded")["x"]
-        #print(mult)
-
-        x = solve_eq(X,y/mult,io_coeff_functions, A,I,y/mult )
+        x = solve_eq(X, y / mult, io_coeff_functions, A, I, y / mult)
     X = get_coeff_matrix(A, I, y, io_coeff_functions)
     hu = humanity(A, I, y, len(A) - len(demand_df), len(demand_df.T), x, s=False, sparse=False)
     return x, y, np.array(X.dot(x), dtype="double"), hu
 
 
-
-
 def generate_data(noise, csv):
-
     production_df = pd.read_csv("data/selviaria.csv")
     demand_df = pd.read_csv("data/selveria_profiles.csv")
 
-    print(production_df)
-
     n_production_items = 6
-    profiles = 2
     n_ticks = 1000
 
     a, b = get_io_approximations()
@@ -102,7 +77,6 @@ def generate_data(noise, csv):
     data["$\mathcal{HU}_p$"] = []
     data["investment"] = []
     data["externalities"] = []
-
 
     for investment in (0.51, 0.52, 0.55, 0.60):
         hu = 0
@@ -124,12 +98,10 @@ def generate_data(noise, csv):
             total_inventory[0] -= x[0] * (1 - investment)
             total_inventory[0] += x[0] * investment
 
-            if(noise):
-                if(np.random.random() < 0.1):
-                    total_inventory[1] = total_inventory[1]*0.8
-                    total_inventory[0] = total_inventory[0]*0.8
-
-
+            if (noise):
+                if (np.random.random() < 0.1):
+                    total_inventory[1] = total_inventory[1] * 0.8
+                    total_inventory[0] = total_inventory[0] * 0.8
 
             data["$\mathcal{HU}_p$"].append(hu)
             data["investment"].append(investment)
@@ -140,9 +112,12 @@ def generate_data(noise, csv):
     df.to_csv(csv)
 
 
-
 if __name__ == "__main__":
-    generate_data(False, csv="./plot_data/selviaria.csv")
-    #generate_data(True, csv="./plot_data/selviaria-noise.csv")
+    parser = ArgumentParser()
+    parser.add_argument('-noisy', action='store_true')
 
-
+    args = parser.parse_args()
+    if(args.noisy):
+        generate_data(True, csv="./plot_data/selviaria-noise.csv")
+    else:
+        generate_data(False, csv="./plot_data/selviaria.csv")
