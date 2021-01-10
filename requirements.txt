@@ -1,7 +1,7 @@
 scipy==1.4.1
 numpy==1.18.3
 pandas==0.24.2
-tensorflow==2.0.0
+tensorflow==2.4.0
 matplotlib==3.0.3
 tqdm==4.19.5
 seaborn==0.9.1
