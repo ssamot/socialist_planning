@@ -74,7 +74,7 @@ def generate_data(noise, csv):
 
     data = {}
     data["tick"] = []
-    data["$\mathcal{HU}_p$"] = []
+    data["$\mathcal{EG}_p$"] = []
     data["investment"] = []
     data["externalities"] = []
 
@@ -103,7 +103,7 @@ def generate_data(noise, csv):
                     total_inventory[1] = total_inventory[1] * 0.8
                     total_inventory[0] = total_inventory[0] * 0.8
 
-            data["$\mathcal{HU}_p$"].append(hu)
+            data["$\mathcal{EG}_p$"].append(hu)
             data["investment"].append(investment)
             data["tick"].append(i)
             print(i, investment, hu)

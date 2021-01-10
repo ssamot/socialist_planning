@@ -15,8 +15,8 @@ for column in columns:
 
 
 
-grid = sns.FacetGrid(df, col="household goods", row = "profiles", hue="industrial_goods", palette="gray_r",
-                      height=1.5)
+grid = sns.FacetGrid(df, col="household goods",  hue="industrial_goods", palette="gray_r",
+                      height=1.5, col_wrap=2)
 
 grid.map(plt.plot, "bounded_time", "dependencies", marker="o")
 
@@ -40,7 +40,7 @@ plt.yticks(dependencies, labels=yticks)
 
 
 fig = plt.gcf()
-fig.set_size_inches(18.5, 5.5)
+fig.set_size_inches(9, 6)
 
 
 
@@ -51,8 +51,8 @@ for ax in fig.axes:
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width , box.height*0.8])
 
-legend = plt.legend(bbox_to_anchor=(-3, 0.9, 2.6, 0.2),loc="upper left",
-      ncol=5, mode="expand", borderaxespad=-2)
+legend = plt.legend(bbox_to_anchor=(-1.0, 0.9, 10, 1.99),loc="upper left",
+      ncol=3)
 for i in range(len(l_labels)):
    legend.get_texts()[i].set_text(l_labels[i])
 
